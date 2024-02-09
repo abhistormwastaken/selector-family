@@ -1,6 +1,6 @@
 
 import './App.css'
-import { RecoilRoot, useRecoilState } from 'recoil';
+import { RecoilRoot, useRecoilState, useRecoilStateLoadable } from 'recoil';
 import { todosAtomFamily } from './atoms';
 
 function App() {
@@ -15,15 +15,26 @@ function App() {
 }
 
 function Todo({id}) {
-   const [todo, setTodo] = useRecoilState(todosAtomFamily(id));
+  // making it useRecoilStateLoadable instead of useRecoilState to handle the loading state
+  const [todo, setTodo] = useRecoilStateLoadable(todosAtomFamily(id));  // alternative is <Suspense fallback={<div>Loading...</div>} />
 
-  return (
-    <>
-      {todo.title}
-      {todo.description}
-      <br />
-    </>
-  )
+  // now our todo is of this format
+  // {
+  //   contents: {id: 1, title: '...', description: '...'},
+  //   state: 'hasValue' | 'loading' | 'hasError',
+  // }
+
+  if (todo.state === 'loading') {
+    return <div>Loading...</div>
+  } else if(todo.state === 'hasValue') {
+    return (
+      <>
+        {todo.contents.title}
+        {todo.contents.description}
+        <br />
+      </>
+    )
+  }
 }
 
 export default App
